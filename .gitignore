@@ -27,3 +27,7 @@ Thumbs.db
 *.pem
 *.*key
 *.*crt
+
+# --- Packer and Terraform
+terraform/packer/*variables.pkrvars.hcl
+terraform/packer/*secrets.pkrvars.hcl
