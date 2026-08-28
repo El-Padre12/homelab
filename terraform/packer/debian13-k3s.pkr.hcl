@@ -42,6 +42,23 @@ variable "bridge" {
   default = "vmbr0"
 }
 
+variable "vm_id" {
+  type        = number
+  default     = 9000
+  description = "override to 9001 for one-off/manual templates so they never collide with the real one Terraform clones from."
+}
+
+variable "vm_name" {
+  type    = string
+  default = "debian13-k3s-template"
+}
+
+variable "provision_script" {
+  type        = string
+  default     = "scripts/provision.sh"
+  description = "override to 'scripts/provision-manual.sh' to build a template to manually log into directly without cloud-init."
+}
+
 variable "ssh_username" {
   type    = string
   default = "debian"
@@ -60,8 +77,8 @@ source "proxmox-iso" "debian13-k3s" {
   insecure_skip_tls_verify = true
 
   node                 = var.proxmox_node
-  vm_id                = 9000
-  vm_name              = "debian13-k3s-template"
+  vm_id                = var.vm_id
+  vm_name              = var.vm_name
   template_description = "Debian 13 (Trixie) + qemu-guest-agent + cloud-init, ready for k3s. Built by Packer on ${timestamp()}"
   
   # Correct block syntax for modern Proxmox plugin local ISO maps
@@ -120,7 +137,7 @@ build {
   sources = ["source.proxmox-iso.debian13-k3s"]
 
   provisioner "shell" {
-    script          = "scripts/provision.sh"
+    script          = var.provision_script
     execute_command = "echo '${var.ssh_password}' | sudo -S sh -c '{{ .Vars }} {{ .Path }}'"
   }
 }
