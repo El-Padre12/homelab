@@ -45,6 +45,20 @@ packer validate -var-file=variables.pkrvars.hcl debian13-k3s.pkr.hcl
 packer build -on-error=ask -var-file=variables.pkrvars.hcl debian13-k3s.pkr.hcl
 ```
 
+the commands above are for a template that will be used by Terraform only; subsequently that means that this template can not be used to test VMs manually.
+
+to solve this I had to change the `provision.sh` file to keep the default user creds and `debian13-k3s.pkr.hcl`file to plug in the new variables that will be overwritten.
+
+as well as run the `packer build` with a few more args:
+
+```bash
+packer build -on-error=ask -var-file=variables.pkrvars.hcl \
+  -var 'vm_id=9001' \
+  -var 'vm_name=debian13-manual-template' \
+  -var 'provision_script=scripts/provision-manual.sh' \
+  debian13-k3s.pkr.hcl
+```
+
 Zettel Notes:
 ```
 after running validate i got a lot depracation warnings,and a checksum missing warning. it still validated tho - ultimately tho it needed to be addressed because it was causing bugs.
